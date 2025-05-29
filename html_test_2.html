@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>2×2 矩陣反矩陣計算器</title>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <style>
+    .matrix-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    .matrix {
+      display: grid;
+      grid-template-columns: 50px 50px;
+      grid-template-rows: 20px 20px;
+      column-gap: 10px;
+    }
+    .matrix-row {
+        display: grid;
+        gap: 6px;
+    }
+    .matrix input {
+      width: 50px;
+      height: 20px;
+      text-align: center;
+    }
+    .latex-bracket {
+      font-size: 3.2em;
+      position: relative;
+      top: 6px;
+    }
+    .error {
+      color: red;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>輸入 2×2 方陣</h2>
+  <div class="matrix-container">
+    <span class="latex-bracket">\( \left[ \right. \)</span>
+    <div class="matrix">
+      <div class="matrix-row">
+        <input id="a11" type="text">
+        <input id="a12" type="text">
+      </div>
+      <div class="matrix-row">
+        <input id="a21" type="text">
+        <input id="a22" type="text">
+      </div>
+    </div>
+    <span class="latex-bracket">\( \left. \right] \)</span>
+  </div>
+
+  <button onclick="computeInverse()">計算反矩陣</button>
+
+  <p id="error" class="error"></p>
+
+  <h3>結果：</h3>
+  <p id="latex"></p>
+
+  <script>
+    function computeInverse() {
+      const ids = ['a11', 'a12', 'a21', 'a22'];
+      const values = ids.map(id => document.getElementById(id).value.trim());
+      const numbers = values.map(v => parseFloat(v));
+      const error = document.getElementById('error');
+      const latex = document.getElementById('latex');
+
+      // 驗證輸入是否為數字
+      if (numbers.some(v => isNaN(v))) {
+        error.textContent = "請輸入有效數字";
+        error.style.display = "block";
+        latex.innerHTML = "";
+        MathJax.typeset();
+        return;
+      }
+
+      error.style.display = "none";
+
+      const [a, b, c, d] = numbers;
+      const det = a * d - b * c;
+
+      if (det === 0) {
+        error.textContent = "此矩陣不可逆（行列式為 0）";
+        error.style.display = "block";
+        latex.innerHTML = "";
+        MathJax.typeset();
+        return;
+      }
+
+      // 計算反矩陣：1/det * [d, -b; -c, a]
+      const inv = [
+        [d / det, -b / det],
+        [-c / det, a / det]
+      ];
+
+      // 建立 LaTeX 顯示內容
+      latex.innerHTML = `
+        原矩陣：\\[
+        A = \\begin{bmatrix}
+        ${a} & ${b} \\\\
+        ${c} & ${d}
+        \\end{bmatrix}
+        \\]
+        反矩陣：\\[
+        A^{-1} = \\frac{1}{${det}} 
+        \\begin{bmatrix}
+        ${d} & ${-b} \\\\
+        ${-c} & ${a}
+        \\end{bmatrix}
+        = 
+        \\begin{bmatrix}
+        ${inv[0][0].toFixed(2)} & ${inv[0][1].toFixed(2)} \\\\
+        ${inv[1][0].toFixed(2)} & ${inv[1][1].toFixed(2)}
+        \\end{bmatrix}
+        \\]
+      `;
+      MathJax.typeset();
+    }
+  </script>
+</body>
+</html>
